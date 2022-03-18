@@ -43,7 +43,7 @@ export async function initProject(projectName: string) {
       start: 'marsx start',
     },
     dependencies: {
-      '@marsx/launcher': '^0.0.1',
+      '@marsx-dev/launcher': '^0.0.1',
     },
   };
   const packageJsonStr = JSON.stringify(packageJson, null, 2);
