@@ -1,11 +1,11 @@
 {
   "name": "@marsx-dev/launcher",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "MarsX launcher",
   "author": "MarsX team <team@marsx.dev>",
   "homepage": "https://marsx.dev/",
   "license": "Apache-2.0",
-  "repository": "github:marsx/launcher",
+  "repository": "github:marsx-dev/launcher",
   "keywords": [
     "marsx",
     "lowcode",
