@@ -1,20 +1,64 @@
 import chalk from 'chalk';
-import { exec } from 'child_process';
+import { spawnSync } from 'child_process';
 import { randomBytes } from 'crypto';
 import path from 'path';
-import * as util from 'util';
 import { Configuration } from '../configuration';
-import { isDirectory, writeFileMakeDir } from '../utils/utils';
+import { assert, isDirectory, writeFileMakeDir } from '../utils/utils';
 import { CliError } from './index';
 
-const execAsync = util.promisify(exec);
+const FASTIFY_DEPS = [
+  '@fastify/session',
+  'fastify',
+  'fastify-accepts',
+  'fastify-compress',
+  'fastify-cookie',
+  'fastify-cors',
+  'fastify-csrf',
+  'fastify-flash',
+  'fastify-formbody',
+  'fastify-helmet',
+  'fastify-multipart',
+  'fastify-request-context',
+  'fastify-static',
+  'fastify-websocket',
+];
 
-const DEMO_BOOTER = `<json id="metadata">
+const COMMON_DEPS = [
+  '@marsx-dev/launcher',
+  'aws-sdk',
+  'axios',
+  'azure-storage',
+  'base-x',
+  'bcrypt',
+  'chokidar',
+  'lodash',
+  'mongodb4@npm:mongodb@4',
+  'mongodb3@npm:mongodb@3',
+  'typescript',
+  'uuid',
+  'xxhash',
+];
+
+const V3_DEPS = [
+  'babel-core',
+  'babel-plugin-transform-react-jsx',
+  'config',
+  'crypto-js',
+  'jsonwebtoken',
+  'mobile-detect',
+  'moment-timezone',
+  'route-pattern',
+  'route-sort',
+];
+
+const DEFAULT_DEPS = [...FASTIFY_DEPS, ...COMMON_DEPS, ...V3_DEPS];
+
+const DEMO_BOOTER = `<json id='metadata'>
 {"version": 4, "restartOnChange": true}
 </json>
 
 
-<script id="BlockFunction" lang="tsx">
+<script id='BlockFunction' lang='tsx'>
 export default async () => {
     console.log('MarsX loaded!')
 };
@@ -42,9 +86,7 @@ export async function initProject(projectName: string) {
     scripts: {
       start: 'marsx start',
     },
-    dependencies: {
-      '@marsx-dev/launcher': '^0.0.1',
-    },
+    dependencies: {},
   };
   const packageJsonStr = JSON.stringify(packageJson, null, 2);
   await writeFileMakeDir(path.join(projectDir, 'package.json'), packageJsonStr);
@@ -54,7 +96,7 @@ export async function initProject(projectName: string) {
     port: 3000,
     blocksDir: 'blocks',
     cacheDir: '.cache',
-    mongoConn: '<YOUR_MONGO_CONN_STR>',
+    mongoConn: '<CONN_STR>',
     mongoDbName: projectName,
     azureStorageConnection: '<CONN_STR>',
     azureStorageAccountName: projectName,
@@ -63,19 +105,33 @@ export async function initProject(projectName: string) {
     webRecentFilesTable: 'webRecentFiles',
     webFilesBlob: 'web-files',
     secret: (await randomBytes(48)).toString('hex'),
-    importProjects: [{ name: 'mars-ide', url: 'https://ide.marscloud.dev', api_key: '<API_KEY>', git_commit_ish: 'main' }],
+    importProjects: [
+      {
+        name: 'mars-ide',
+        url: 'https://ide.marscloud.dev',
+        api_key: '<API_KEY>',
+        git_commit_ish: 'main',
+      },
+    ],
   };
 
   await writeFileMakeDir(path.join(projectDir, 'config', 'default.json'), JSON.stringify(config, null, 2));
+  await writeFileMakeDir(path.join(projectDir, '.gitignore'), 'node_modules\ndist');
 
   await writeFileMakeDir(path.join(projectDir, 'blocks', 'Booter.service.vue'), DEMO_BOOTER);
 
+  function run(...args: string[]) {
+    const cmd = args[0];
+    assert(cmd);
+    spawnSync(cmd, args.slice(1), { cwd: projectDir, stdio: 'inherit' });
+  }
   console.log('Installing dependencies. This might take a couple of minutes.');
-  await execAsync('npm install', { cwd: projectDir });
+  run('npm', 'i', ...DEFAULT_DEPS);
 
-  await execAsync('git init', { cwd: projectDir });
-  await execAsync('git add -A', { cwd: projectDir });
-  await execAsync('git commit -m "Initial commit"', { cwd: projectDir });
+  run('git', 'init');
+  run('git', 'add', '.gitignore');
+  run('git', 'add', '-A');
+  run('git', 'commit', '-m', 'Initial commit');
   console.log('Initialized git repository and created initial commit.');
 
   console.log(chalk.yellow(`\nMake sure to update parameters in config/default.json`));
