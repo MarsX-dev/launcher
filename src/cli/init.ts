@@ -116,7 +116,7 @@ export async function initProject(projectName: string) {
   };
 
   await writeFileMakeDir(path.join(projectDir, 'config', 'default.json'), JSON.stringify(config, null, 2));
-  await writeFileMakeDir(path.join(projectDir, '.gitignore'), 'node_modules\ndist');
+  await writeFileMakeDir(path.join(projectDir, '.gitignore'), 'node_modules\ndist\n.cache\n');
 
   await writeFileMakeDir(path.join(projectDir, 'blocks', 'Booter.service.vue'), DEMO_BOOTER);
 
