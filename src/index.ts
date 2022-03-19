@@ -1,2 +1,5 @@
-export { start } from './cli/start';
-export { migrateV3ToV4 } from './cli/migrate';
+export { config } from './configuration';
+export { compileSfcSource, transpileTypescript } from './utils/compile';
+export { parseSFC, serializeSfc } from './utils/sfc';
+export * as utils from './utils/utils';
+export { convertSfcToV3, convertV3ToSfc } from './utils/v3';
