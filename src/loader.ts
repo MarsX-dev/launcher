@@ -6,7 +6,7 @@ import _ from 'lodash';
 import path from 'path';
 import { config, ImportProjectConfig } from './configuration';
 import { parseSFC, SfcBlock } from './utils/sfc';
-import { isFile, listFilesRecursive, writeFileMakeDir } from './utils/utils';
+import { isFile, listFilesRecursive, writeFileMakeDir } from './utils/fileUtils';
 import { convertV3ToSfc, V3MongoBlock } from './utils/v3';
 
 async function downloadFromExternal(externalImport: ImportProjectConfig): Promise<SfcBlock[]> {

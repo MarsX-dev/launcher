@@ -3,7 +3,7 @@ import { MongoClient } from 'mongodb';
 import path from 'path';
 import { config } from '../configuration';
 import { serializeSfc } from '../utils/sfc';
-import { writeFileMakeDir } from '../utils/utils';
+import { writeFileMakeDir } from '../utils/fileUtils';
 import { convertV3ToSfc, V3MongoBlock } from '../utils/v3';
 
 export async function migrateV3ToV4() {

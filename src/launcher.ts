@@ -2,7 +2,8 @@ import { config } from './configuration';
 import { loadAllBlocks } from './loader';
 import { compileSfcSource, transpileTypescript } from './utils/compile';
 import { parseSFC, serializeSfc } from './utils/sfc';
-import { assert, writeFileMakeDir } from './utils/utils';
+import { writeFileMakeDir } from './utils/fileUtils';
+import { assert } from './utils/textUtils';
 import { convertSfcToV3, convertV3ToSfc } from './utils/v3';
 
 const LAUNCHER_UTILS = {
@@ -19,7 +20,7 @@ const LAUNCHER_UTILS = {
 export async function launchBooter(booterBlockName = 'Booter') {
   const allBlocks = await loadAllBlocks();
 
-  const booterBlocks = allBlocks.filter(b => b.identity.name === booterBlockName);
+  const booterBlocks = allBlocks.filter(b => b.path.name === booterBlockName);
   if (booterBlocks.length === 0)
     throw new Error(`Booter block ${booterBlockName} not found. Ensure you have it locally or it is imported.`);
 

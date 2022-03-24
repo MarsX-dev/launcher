@@ -5,24 +5,6 @@ import { Mode, ObjectEncodingOptions, OpenMode } from 'node:fs';
 import { Stream } from 'node:stream';
 import path from 'path';
 
-export function assert(value: unknown, message = 'value must be defined'): asserts value {
-  if (!value) {
-    throw new Error(message);
-  }
-}
-
-export function escapeCloseTag(str: string, tag: string): string {
-  return str.replaceAll(`</${tag}>`, `</ ${tag}>`);
-}
-
-export function unescapeCloseTag(str: string, tag: string): string {
-  return str.replaceAll(`</ ${tag}>`, `</${tag}>`);
-}
-
-export function escapeHtmlAttr(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
 export async function listFilesRecursive(dir: string): Promise<string[]> {
   const entries = await fs.readdir(dir);
 

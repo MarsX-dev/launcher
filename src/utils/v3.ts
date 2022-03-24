@@ -49,12 +49,11 @@ const SFC_FIELD_MAP: Record<string, string> = {
 
 export function convertV3ToSfc(block: V3MongoBlock): SfcBlock {
   const sfc: SfcBlock = {
-    identity: {
+    path: {
       folder: block.Folder,
       name: block.Name,
       blockTypeName: block.Type,
       ext: 'vue',
-      fullName: '',
       filePath: '',
     },
     metadata: {},
@@ -90,9 +89,9 @@ export function convertV3ToSfc(block: V3MongoBlock): SfcBlock {
 
 export function convertSfcToV3(sfc: SfcBlock): V3MongoBlock {
   const block: V3MongoBlock = {
-    Name: sfc.identity.name,
-    Type: sfc.identity.blockTypeName,
-    Folder: sfc.identity.folder,
+    Name: sfc.path.name,
+    Type: sfc.path.blockTypeName,
+    Folder: sfc.path.folder,
     ...sfc.metadata,
     ...sfc.jsons,
   };

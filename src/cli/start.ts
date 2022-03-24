@@ -1,7 +1,7 @@
 import child_process from 'child_process';
 import { config } from '../configuration';
 import { launchBooter } from '../launcher';
-import { assert } from '../utils/utils';
+import { assert } from '../utils/textUtils';
 
 export const RESTART_EXIT_CODe = 9;
 

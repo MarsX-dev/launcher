@@ -1,6 +1,6 @@
 {
   "name": "@marsx-dev/launcher",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "MarsX launcher",
   "author": "MarsX team <team@marsx.dev>",
   "homepage": "https://marsx.dev/",
@@ -43,7 +43,8 @@
     "chalk": "^4.1.2",
     "commander": "^9.1.0",
     "json-stable-stringify": "^1.0.1",
-    "json5": "^2.2.0"
+    "json5": "^2.2.0",
+    "yup": "^0.32.11"
   },
   "peerDependencies": {
     "@types/config": "^0.0.41",
@@ -59,6 +60,7 @@
   },
   "devDependencies": {
     "@types/json-stable-stringify": "^1.0.34",
+    "@types/yup": "^0.29.13",
     "@typescript-eslint/eslint-plugin": "^5.10.2",
     "@typescript-eslint/parser": "^5.10.2",
     "eslint": "^8.8.0",
