@@ -120,7 +120,7 @@ export async function initProject(projectName: string) {
   function run(...args: string[]) {
     const cmd = args[0];
     assert(cmd);
-    spawnSync(cmd, args.slice(1), { cwd: projectDir, stdio: 'inherit' });
+    spawnSync(cmd, args.slice(1), { cwd: projectDir, stdio: 'inherit', shell: true });
   }
 
   console.log('\nInstalling dependencies. This might take a couple of minutes.');
