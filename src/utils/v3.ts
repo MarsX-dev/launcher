@@ -1,4 +1,4 @@
-import { SfcBlock } from './sfc';
+import { MARS_SFC_EXT, SfcBlock } from './sfc';
 
 export type V3MongoBlock = {
   Folder: string;
@@ -53,7 +53,7 @@ export function convertV3ToSfc(block: V3MongoBlock): SfcBlock {
       folder: block.Folder,
       name: block.Name,
       blockTypeName: block.Type,
-      ext: 'vue',
+      ext: MARS_SFC_EXT,
       filePath: '',
     },
     metadata: {},
