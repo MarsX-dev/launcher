@@ -1,6 +1,6 @@
 {
   "name": "@marsx-dev/launcher",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "MarsX launcher",
   "author": "MarsX team <team@marsx.dev>",
   "homepage": "https://marsx.dev/",
@@ -44,7 +44,8 @@
     "commander": "^9.1.0",
     "json-stable-stringify": "^1.0.1",
     "json5": "^2.2.0",
-    "yup": "^0.32.11"
+    "yup": "^0.32.11",
+    "minimist": ">=1.2.6"
   },
   "peerDependencies": {
     "@types/config": "^0.0.41",
