@@ -14,15 +14,16 @@ type V4Response = { commit: string; hash: string; blocks: SfcBlock[] };
 async function downloadFromExternal(externalImport: ImportProjectConfig): Promise<V4Response> {
   const params = { api_key: externalImport.api_key, git_commit_ish: externalImport.git_commit_ish || '' };
 
-  console.log(`Downloading blocks from ${externalImport.url}`);
+  const url = _.trimEnd(externalImport.url, '/');
+  console.log(`Downloading blocks from ${url}`);
   try {
-    const v4Resp = await axios.get<V4Response>(`${externalImport.url}/api/GetExportedAppBlocksV4`, { params });
+    const v4Resp = await axios.get<V4Response>(`${url}/api/GetExportedAppBlocksV4`, { params });
     return v4Resp.data;
   } catch (e) {
-    console.log(`${externalImport.url} does not support V4, fallback to V3`);
+    console.log(`${url} does not support V4, fallback to V3`);
   }
 
-  const v3Resp = await axios.get<V3MongoBlock[]>(`${externalImport.url}/api/GetExportedAppBlocks`, { params });
+  const v3Resp = await axios.get<V3MongoBlock[]>(`${url}/api/GetExportedAppBlocks`, { params });
   return { commit: '', hash: '', blocks: v3Resp.data.map(b => convertV3ToSfc(b)) };
 }
 

@@ -6,6 +6,7 @@ import { Config, CustomEnvironmentVariables } from '../configuration';
 import { isDirectory, writeFileMakeDir } from '../utils/fileUtils';
 import { assert } from '../utils/textUtils';
 import { CliError } from './index';
+import { promises as fs } from 'fs';
 
 const FASTIFY_DEPS = [
   '@fastify/session',
@@ -103,7 +104,7 @@ export async function initProject(projectName: string) {
     importProjects: [
       {
         name: 'marsx-core',
-        url: 'https://core.marsx.dev',
+        url: 'https://core.marscloud.dev',
         api_key: '<API_KEY>',
         git_commit_ish: 'main',
       },
@@ -130,7 +131,10 @@ export async function initProject(projectName: string) {
   run('git', 'init', '--initial-branch=main');
   run('git', 'add', '.gitignore');
   run('git', 'add', '-A');
-  run('git', 'commit', '-m', 'Initial MarsX commit');
+  // When shell=true cmd args must be escaped
+  run('git', 'commit', '-m', '"Initial MarsX commit"');
+
+  await fs.mkdir(path.join(projectDir, 'blocks'));
 
   console.log(`\n${chalk.green('Success!')} Created ${projectName} at ${projectDir}`);
 
