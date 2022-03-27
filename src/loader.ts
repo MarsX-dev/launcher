@@ -9,19 +9,21 @@ import { parseSFC, SfcBlock } from './utils/sfc';
 import { isFile, listFilesRecursive, writeFileMakeDir } from './utils/fileUtils';
 import { convertV3ToSfc, V3MongoBlock } from './utils/v3';
 
-async function downloadFromExternal(externalImport: ImportProjectConfig): Promise<SfcBlock[]> {
+type V4Response = { commit: string; hash: string; blocks: SfcBlock[] };
+
+async function downloadFromExternal(externalImport: ImportProjectConfig): Promise<V4Response> {
   const params = { api_key: externalImport.api_key, git_commit_ish: externalImport.git_commit_ish || '' };
 
   console.log(`Downloading blocks from ${externalImport.url}`);
   try {
-    const v4Resp = await axios.get<SfcBlock[]>(`${externalImport.url}/api/GetExportedAppBlocksV4`, { params });
+    const v4Resp = await axios.get<V4Response>(`${externalImport.url}/api/GetExportedAppBlocksV4`, { params });
     return v4Resp.data;
   } catch (e) {
     console.log(`${externalImport.url} does not support V4, fallback to V3`);
   }
 
   const v3Resp = await axios.get<V3MongoBlock[]>(`${externalImport.url}/api/GetExportedAppBlocks`, { params });
-  return v3Resp.data.map(b => convertV3ToSfc(b));
+  return { commit: '', hash: '', blocks: v3Resp.data.map(b => convertV3ToSfc(b)) };
 }
 
 async function loadCachedOrDownload(externalImport: ImportProjectConfig): Promise<SfcBlock[]> {
@@ -35,11 +37,11 @@ async function loadCachedOrDownload(externalImport: ImportProjectConfig): Promis
     return JSON.parse(content.toString('utf-8'));
   }
 
-  const data = await downloadFromExternal(externalImport);
-  console.log(`Downloaded ${data.length} blocks from ${externalImport.url}`);
+  const { blocks } = await downloadFromExternal(externalImport);
+  console.log(`Downloaded ${blocks.length} blocks from ${externalImport.url}`);
 
-  await writeFileMakeDir(cacheFilePath, JSON.stringify(data, null, 2), 'utf-8');
-  return data;
+  await writeFileMakeDir(cacheFilePath, JSON.stringify(blocks, null, 2), 'utf-8');
+  return blocks;
 }
 
 async function downloadAll(externalImports: ImportProjectConfig[]) {
