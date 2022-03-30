@@ -17,6 +17,7 @@ export function transpileTypescript(
     originalFilePath?: string;
     compiledFilePath?: string;
     lineOffset?: number | undefined;
+    compilerOptions?: ts.CompilerOptions;
   },
 ): string {
   const compiledFilePath = options?.compiledFilePath || '<UNKNOWN>.js';
@@ -32,8 +33,7 @@ export function transpileTypescript(
       target: ts.ScriptTarget.Latest,
       esModuleInterop: true,
       sourceMap: true,
-      // inlineSources: true,
-      // inlineSourceMap: true,
+      ...options?.compilerOptions,
     },
   });
   assert(transpiled.sourceMapText);
@@ -46,13 +46,22 @@ export function transpileTypescript(
   return transpiled.outputText.replace(/\n\/\/# sourceMappingURL=.+/, '') + sourceMapComment;
 }
 
-export async function compileSfcSource(sfcBlock: SfcBlock, sourceId: string): Promise<string> {
+export async function compileSfcSource(
+  sfcBlock: SfcBlock,
+  sourceId: string,
+  options?: { compileOptions?: ts.CompilerOptions },
+): Promise<string> {
   const sourceCode = sfcBlock.sources[sourceId];
   if (!sourceCode) throw new Error(`Source code block ${sourceId} not found in ${sfcBlock.path.filePath}`);
 
   const compiledFilePath = path.join(config.cacheDir, 'compiled', `${sfcBlock.path.filePath}.${sourceId}.js`);
   const originalFilePath = path.join(config.blocksDir, sfcBlock.path.filePath);
-  const code = transpileTypescript(sourceCode.source, { compiledFilePath, originalFilePath, lineOffset: sourceCode.lineOffset });
+  const code = transpileTypescript(sourceCode.source, {
+    compiledFilePath,
+    originalFilePath,
+    lineOffset: sourceCode.lineOffset,
+    ...options,
+  });
 
   await writeFileMakeDir(compiledFilePath, code, 'utf-8');
   return compiledFilePath;

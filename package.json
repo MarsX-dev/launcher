@@ -1,6 +1,6 @@
 {
   "name": "@marsx-dev/launcher",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "MarsX launcher",
   "author": "MarsX team <team@marsx.dev>",
   "homepage": "https://marsx.dev/",
@@ -20,6 +20,7 @@
   "files": [
     "dist",
     "src",
+    "jsx-runtime",
     "LICENSE",
     "README.md"
   ],
