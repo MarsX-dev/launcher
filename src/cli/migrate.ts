@@ -10,7 +10,14 @@ export async function migrateV3ToV4() {
   console.log('Connecting to MongoDB...');
   const mongoConn = await new MongoClient(config.mongoConn).connect();
   const db = mongoConn.db(config.mongoDbName);
-  const allBlocks = await db.collection<V3MongoBlock>('blocks').find().toArray();
+  const allBlocks = await db
+    .collection<V3MongoBlock>('blocks')
+    .find({
+      Type: {
+        $ne: 'settings',
+      },
+    })
+    .toArray();
   console.log(`Downloaded ${allBlocks.length} block(s)`);
 
   for (const block of allBlocks) {
