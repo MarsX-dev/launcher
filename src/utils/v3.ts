@@ -4,7 +4,7 @@ export type V3MongoBlock = {
   Folder: string;
   Name: string;
   Type: string;
-  app?: { name: string };
+  app?: { name: string; appId: string };
 } & Record<string, unknown>;
 
 const SFC_FIELD_MAP: Record<string, string> = {
@@ -47,6 +47,26 @@ const SFC_FIELD_MAP: Record<string, string> = {
   // ... rest of the fields will be saved in metadata
 };
 
+const SFC_SOURCE_MAP: Record<string, string> = {
+  // JSONs
+  DataArgs: 'DataArgs',
+  Page: 'Page',
+  // Scripts
+  BlockFunction: 'BlockFunction',
+  Html: 'Html',
+  HTML: 'Html',
+  Jsx: 'Jsx',
+  JsxTranspiled: 'JsxTranspiled',
+  JsxTranspiledTranspiled: 'JsxTranspiledTranspiled',
+  JSX: 'Jsx',
+  JSXTranspiled: 'JsxTranspiled',
+  DemoJsx: 'DemoJsx',
+  DemoJsxTranspiled: 'DemoJsxTranspiled',
+  Script: 'Script',
+  Css: 'Css',
+  TestCode: 'TestCode',
+};
+
 export function convertV3ToSfc(block: V3MongoBlock): SfcBlock {
   const sfc: SfcBlock = {
     path: {
@@ -63,11 +83,12 @@ export function convertV3ToSfc(block: V3MongoBlock): SfcBlock {
   };
   for (const [prop, value] of Object.entries(block)) {
     const sfcLang = SFC_FIELD_MAP[prop] || 'METADATA';
+    const sfcSourceName = SFC_SOURCE_MAP[prop] || prop;
 
     switch (sfcLang) {
       case 'json':
         if (typeof value !== 'object' && !Array.isArray(value)) throw new Error(`Object or array is expected for ${prop} property`);
-        sfc.jsons[prop] = value;
+        sfc.jsons[sfcSourceName] = value;
         break;
       case 'DELETE':
         break;
@@ -76,13 +97,22 @@ export function convertV3ToSfc(block: V3MongoBlock): SfcBlock {
         break;
       default:
         if (typeof value !== 'string') throw new Error(`String is expected for ${prop} property`);
-        sfc.sources[prop] = { source: value, lang: sfcLang };
+        sfc.sources[prop] = {
+          name: sfcSourceName,
+          source: value,
+          lang: sfcLang,
+        };
         break;
     }
   }
 
+  sfc.metadata['marsVersion'] = 3;
+
   if (block.app) {
-    sfc.metadata['app'] = { name: block.app.name };
+    sfc.metadata['app'] = {
+      name: block.app.name,
+      appId: block.app.appId,
+    };
   }
   return sfc;
 }
