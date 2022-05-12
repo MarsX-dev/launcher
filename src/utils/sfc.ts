@@ -1,10 +1,11 @@
 import { CompilerError } from '@vue/compiler-core';
 import JSON5 from 'json5';
+import { config } from '../configuration';
 import _ from 'lodash';
 import path from 'path';
-import { escapeCloseTag, escapeHtmlAttr, parseVueLike, stableHtmlAttributes, stablePrettyJson, unescapeCloseTag } from './textUtils';
+import { escapeCloseTag, escapeHtmlAttr, parseVueLike, stablePrettyJson, unescapeCloseTag } from './textUtils';
 
-export const METADATA_SECTION_ID = 'metadata';
+export const METADATA_SECTION_ID = 'block';
 export const MARS_SFC_EXT = 'mars';
 
 const SAVE_EMPTY_SOURCES = true;
@@ -18,6 +19,7 @@ export type SfcPath = {
 };
 
 export type SfcSource = {
+  name: string;
   source: string;
   lang: keyof typeof LANG_TAG_MAP | string | undefined;
   props?: Record<string, string | undefined>;
@@ -48,8 +50,17 @@ export function parseSfcPath(filePath: string): SfcPath {
   };
 }
 
-export function serializeSfcPath(identity: SfcPath): string {
-  return path.join(identity.folder, `${identity.name}.${identity.blockTypeName}.${identity.ext}`);
+export function serializeSfcDirPath(block: SfcBlock): string {
+  const blockFolderName = `${block.path.name}.${block.path.blockTypeName}`;
+
+  if (block.metadata['app']) {
+    const appName = _.get(block, 'metadata.app.appId') || _.get(block, 'metadata.app.name');
+    const appSlug = _.upperFirst(_.camelCase(appName));
+    const blockFolderPath = path.join(...block.path.folder.split('/').slice(2));
+    return path.join(`${appSlug}.app`, blockFolderPath, blockFolderName);
+  }
+
+  return path.join(`${config.projectName}.app`, block.path.folder, blockFolderName);
 }
 
 type EmptyObject = {
@@ -114,7 +125,7 @@ export function parseSFC(filePath: string, content: Buffer): SfcBlock {
     } else {
       const source = unescapeCloseTag(node.content.slice(1, -1), node.tag);
       const lineOffset = node.loc.start.line;
-      block.sources[sectionId] = { source, lang, props, lineOffset };
+      block.sources[sectionId] = { name: sectionId, source, lang, props, lineOffset };
     }
   }
 
@@ -125,31 +136,36 @@ export function parseSFC(filePath: string, content: Buffer): SfcBlock {
   return block;
 }
 
-export function serializeSfc(block: SfcBlock): { filePath: string; content: Buffer } {
-  const filePath = serializeSfcPath(block.path);
+export function serializeSfc(block: SfcBlock): { filePath: string; content: Buffer }[] {
+  const blockDirPath = serializeSfcDirPath(block);
+
   if (block.path.ext !== MARS_SFC_EXT) {
     if (block.rawContent === null) throw new Error(`SfcBlock must have rawContent if ext!="${MARS_SFC_EXT}"`);
-    return { filePath, content: block.rawContent };
+    return [{ filePath: path.join(blockDirPath, `index.${block.path.ext}`), content: block.rawContent }];
   }
 
   if (block.rawContent !== null) throw new Error(`SfcBlock cannot have rawContent if ext=="${MARS_SFC_EXT}"`);
 
-  let content = '';
+  const sourceContents: { filePath: string; content: Buffer }[] = [];
 
   for (const [name, source] of [[METADATA_SECTION_ID, block.metadata] as const, ..._.sortBy(Object.entries(block.jsons), e => e[0])]) {
     const jsonStr = stablePrettyJson(source);
-    content += `<json id="${escapeHtmlAttr(name)}">\n${jsonStr}</json>\n\n`;
+    sourceContents.push({
+      filePath: path.join(blockDirPath, `${name}.json5`),
+      content: Buffer.from(jsonStr, 'utf-8'),
+    });
   }
 
-  for (const [name, source] of _.sortBy(Object.entries(block.sources), e => e[0])) {
+  for (const source of _.sortBy(block.sources, e => e.name)) {
     if (!SAVE_EMPTY_SOURCES && !source.source.trim()) continue;
     const tag = (LANG_TAG_MAP as Record<string, string>)[source.lang || ''] || 'text';
-    const id = escapeHtmlAttr(name);
     const lang = escapeHtmlAttr(source.lang || '');
-    const props = stableHtmlAttributes(source.props);
     const text = escapeCloseTag(source.source, tag);
-    content += `<${tag} id="${id}" lang="${lang}"${props}>\n${text}\n</${tag}>\n\n`;
+    sourceContents.push({
+      filePath: path.join(blockDirPath, `${source.name}.${lang}`),
+      content: Buffer.from(text, 'utf-8'),
+    });
   }
 
-  return { filePath, content: Buffer.from(content, 'utf-8') };
+  return sourceContents;
 }

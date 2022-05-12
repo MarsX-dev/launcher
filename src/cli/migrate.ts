@@ -6,11 +6,11 @@ import { serializeSfc } from '../utils/sfc';
 import { writeFileMakeDir } from '../utils/fileUtils';
 import { convertV3ToSfc, V3MongoBlock } from '../utils/v3';
 
-export async function migrateV3ToV4() {
+export async function downloadBLocks(): Promise<V3MongoBlock[]> {
   console.log('Connecting to MongoDB...');
   const mongoConn = await new MongoClient(config.mongoConn).connect();
   const db = mongoConn.db(config.mongoDbName);
-  const allBlocks = await db
+  const allBlocks: V3MongoBlock[] = await db
     .collection<V3MongoBlock>('blocks')
     .find({
       Type: {
@@ -19,12 +19,23 @@ export async function migrateV3ToV4() {
     })
     .toArray();
   console.log(`Downloaded ${allBlocks.length} block(s)`);
+  return allBlocks;
+}
 
+export async function migrate(allBlocks: V3MongoBlock[]) {
   for (const block of allBlocks) {
-    const serialized = serializeSfc(convertV3ToSfc(block));
-    await writeFileMakeDir(path.join(config.blocksDir, serialized.filePath), serialized.content);
-    console.log(`Saved ${serialized.filePath}`);
+    const sfcBlock = convertV3ToSfc(block);
+    const serialized = serializeSfc(sfcBlock);
+    for (const source of serialized) {
+      await writeFileMakeDir(path.join(config.blocksDir, source.filePath), source.content);
+      console.log(`Saved ${source.filePath}`);
+    }
   }
 
   console.log(chalk.green('\nMigration complete successfully!'));
+}
+
+export async function migrateV3ToV4() {
+  const allBlocks = await downloadBLocks();
+  return migrate(allBlocks);
 }

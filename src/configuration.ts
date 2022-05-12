@@ -15,6 +15,7 @@ export interface ImportProjectConfig {
 export interface Config {
   production: boolean;
   port: number;
+  projectName: string;
   blocksDir: string;
   cacheDir: string;
   mongoConn: string;
@@ -41,6 +42,7 @@ const ImportProjectSchema = yup.object({
 const ConfigSchema = yup.object().shape({
   production: yup.boolean().required(),
   port: yup.number().required().positive().integer(),
+  projectName: yup.string().required(),
   blocksDir: yup
     .string()
     .required()

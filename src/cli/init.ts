@@ -7,6 +7,8 @@ import { isDirectory, writeFileMakeDir } from '../utils/fileUtils';
 import { assert } from '../utils/textUtils';
 import { CliError } from './index';
 import { promises as fs } from 'fs';
+import _camelCase from 'lodash/camelCase';
+import _upperFirst from 'lodash/upperFirst';
 
 const FASTIFY_DEPS = [
   '@fastify/session',
@@ -65,6 +67,7 @@ export async function initProject(projectName: string) {
     snakeCase: projectName,
     withDashes: projectName.replace('_', '-'),
     noSep: projectName.replace('_', ''),
+    capCamelCase: _upperFirst(_camelCase(projectName)),
   };
 
   const projectDir = path.resolve(projectName);
@@ -90,7 +93,8 @@ export async function initProject(projectName: string) {
   const config: Config = {
     production: false,
     port: 3000,
-    blocksDir: 'blocks',
+    blocksDir: 'src',
+    projectName: name.capCamelCase,
     cacheDir: '.cache',
     mongoConn: '<CONN_STR>',
     mongoDbName: name.withDashes,
