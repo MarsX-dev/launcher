@@ -54,5 +54,5 @@ export async function writeFileMakeDir(
 }
 
 export async function removeFile(filePath: string, options?: RmOptions): Promise<void> {
-  await fs.rm(path.dirname(filePath), options);
+  await fs.rm(filePath, options);
 }
