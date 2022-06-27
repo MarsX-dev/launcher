@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import _ from 'lodash';
 import { Abortable } from 'node:events';
-import { Mode, ObjectEncodingOptions, OpenMode } from 'node:fs';
+import { Mode, ObjectEncodingOptions, OpenMode, RmOptions } from 'node:fs';
 import { Stream } from 'node:stream';
 import path from 'path';
 
@@ -51,4 +51,8 @@ export async function writeFileMakeDir(
 ): Promise<void> {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.writeFile(filePath, data, options);
+}
+
+export async function removeFile(filePath: string, options?: RmOptions): Promise<void> {
+  await fs.rm(filePath, options);
 }
